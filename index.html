@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Action Mastery — Trade Without Indicators</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --lime: #a3e635;
+    --lime-bright: #bef264;
+    --lime-dim: #65a30d;
+    --lime-glow: #84cc16;
+    --lime-ultra: #d9f99d;
+    --dark: #060606;
+    --dark2: #0d0d0d;
+    --dark3: #141414;
+    --dark4: #1c1c1c;
+    --dark5: #242424;
+    --text: #f0f0f0;
+    --text-muted: #7a7a7a;
+    --text-dim: #444;
+    --border: rgba(163,230,53,0.1);
+    --border-bright: rgba(163,230,53,0.35);
+    --red: #ef4444;
+    --gold: #f59e0b;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.022;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    padding: 72px 32px 56px;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 500px;
+    background: radial-gradient(ellipse, rgba(163,230,53,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(163,230,53,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(163,230,53,0.03) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(163,230,53,0.07);
+    border: 1px solid var(--border-bright);
+    color: var(--lime);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.8s ease both;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--lime);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero h1 {
+    font-size: clamp(36px, 6.5vw, 72px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -1.5px;
+    margin-bottom: 10px;
+    animation: fadeSlideDown 0.8s 0.1s ease both;
+  }
+
+  .hero h1 .accent {
+    color: var(--lime);
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -1px;
+  }
+
+  .hero-tagline {
+    font-size: clamp(13px, 2vw, 16px);
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 16px auto 32px;
+    line-height: 1.7;
+    font-weight: 400;
+    animation: fadeSlideDown 0.8s 0.2s ease both;
+  }
+
+  /* Stats Row */
+  .hero-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    animation: fadeSlideDown 0.8s 0.3s ease both;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .stat-pill .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 6px var(--lime);
+  }
+
+  .stat-pill span { color: var(--text-muted); }
+  .stat-pill strong { color: var(--lime); font-weight: 600; }
+
+  /* CTA */
+  .hero-cta-wrap {
+    animation: fadeSlideDown 0.8s 0.4s ease both;
+  }
+
+  .cta-enjoy {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--lime);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 16px 40px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+
+  .cta-enjoy::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .cta-enjoy:hover::before { transform: translateX(100%); }
+  .cta-enjoy:hover { background: var(--lime-bright); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(163,230,53,0.3); }
+
+  .cta-enjoy .arrow {
+    font-size: 20px;
+    transition: transform 0.2s;
+  }
+  .cta-enjoy:hover .arrow { transform: translateX(4px); }
+
+  .cta-note {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Chart animation */
+  .chart-anim {
+    width: 100%;
+    max-width: 560px;
+    margin: 44px auto 0;
+    height: 110px;
+    position: relative;
+    animation: fadeSlideDown 0.8s 0.5s ease both;
+  }
+
+  .chart-anim svg { width: 100%; height: 100%; }
+
+  @keyframes drawLine { from{stroke-dashoffset:1200} to{stroke-dashoffset:0} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes pulse { 0%,100%{opacity:0.5;r:3.5px} 50%{opacity:1;r:5px} }
+  @keyframes fadeSlideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeSlideUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .chart-line { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 3.5s cubic-bezier(0.4,0,0.2,1) forwards 0.8s; }
+  .chart-fill { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 3.5s cubic-bezier(0.4,0,0.2,1) forwards 0.8s; }
+  .chart-dot { animation: pulse 2s infinite; }
+
+  /* ── PROOF BAR ── */
+  .proof-bar {
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
+
+  .proof-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .proof-item strong {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .proof-item .icon {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .proof-sep {
+    width: 1px; height: 20px;
+    background: var(--border);
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark2);
+    padding: 0 28px;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-tabs::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(12px);
+    background: rgba(13,13,13,0.85);
+    z-index: -1;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 16px 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .tab-btn:hover { color: var(--text-muted); }
+
+  .tab-btn.active {
+    color: var(--lime);
+    border-bottom-color: var(--lime);
+  }
+
+  /* ── SECTION ── */
+  .section { display: none; padding: 36px 28px 60px; max-width: 800px; margin: 0 auto; }
+  .section.active { display: block; animation: fadeSlideUp 0.3s ease both; }
+
+  /* Section headings */
+  .sec-heading {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--lime-dim);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sec-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+  }
+
+  /* ── MODULE CARDS ── */
+  .module-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .module-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    cursor: pointer;
+    animation: slideUp 0.4s ease backwards;
+  }
+
+  .module-card:hover { border-color: var(--border-bright); }
+  .module-card.open { border-color: rgba(163,230,53,0.4); box-shadow: 0 0 30px rgba(163,230,53,0.04); }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    user-select: none;
+  }
+
+  .module-num {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(163,230,53,0.06);
+    border: 1px solid var(--border-bright);
+    color: var(--lime);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+
+  .module-title { flex: 1; }
+  .module-title h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
+  .module-title p { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+
+  .module-arrow {
+    color: var(--text-dim);
+    font-size: 12px;
+    transition: transform 0.25s, color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .module-card.open .module-arrow { transform: rotate(180deg); color: var(--lime); }
+
+  .module-body {
+    display: none;
+    padding: 0 22px 22px;
+    border-top: 1px solid var(--border);
+    animation: fadeIn 0.25s ease;
+  }
+
+  .module-card.open .module-body { display: block; }
+
+  .module-intro {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin: 16px 0 18px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border-bright);
+    font-style: italic;
+  }
+
+  .lesson-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .lesson-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 10px 14px;
+    background: var(--dark3);
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .lesson-item:hover {
+    border-color: var(--border);
+    background: var(--dark4);
+    color: var(--text);
+  }
+
+  .lesson-item-text { display: flex; align-items: flex-start; gap: 10px; flex: 1; }
+
+  .lesson-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--lime-dim);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .lesson-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    background: rgba(163,230,53,0.07);
+    border: 1px solid var(--border);
+    color: var(--lime-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: flex-start;
+    text-transform: uppercase;
+  }
+
+  .lesson-item { flex-direction: column; align-items: stretch; gap: 0; }
+  .lesson-item-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .lesson-item-text { flex: 1; }
+
+  .lesson-body {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.82;
+    margin-top: 10px;
+    padding-top: 11px;
+    border-top: 1px solid rgba(163,230,53,0.07);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .lesson-item:hover .lesson-body { color: var(--text-muted); }
+
+  /* ── WHAT YOU LEARN (intro section top) ── */
+  .learn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .learn-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .learn-card:hover { border-color: var(--border-bright); }
+
+  .learn-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--lime-dim), transparent);
+    opacity: 0.4;
+  }
+
+  .learn-icon { font-size: 22px; margin-bottom: 10px; }
+  .learn-card h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .learn-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── CHECKLIST ── */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .check-item:hover { border-color: var(--border-bright); background: var(--dark3); color: var(--text); }
+
+  .check-item.checked {
+    color: var(--lime);
+    border-color: rgba(163,230,53,0.25);
+    background: rgba(163,230,53,0.04);
+  }
+
+  .check-box {
+    width: 20px; height: 20px;
+    border: 1px solid var(--text-dim);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--lime);
+    border-color: var(--lime);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .check-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--lime-dim);
+    text-transform: uppercase;
+    margin: 24px 0 10px;
+  }
+
+  .checklist-progress {
+    background: var(--dark3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--dark5);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--lime);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--lime);
+    white-space: nowrap;
+  }
+
+  /* ── RISK CALC ── */
+  .risk-calc {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .risk-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 130px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .risk-row input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: var(--dark5);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .risk-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--lime);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(163,230,53,0.4);
+    transition: box-shadow 0.2s;
+  }
+
+  .risk-row input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 16px rgba(163,230,53,0.6);
+  }
+
+  .risk-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--lime);
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .risk-result {
+    background: var(--dark3);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  @media(min-width:480px) { .risk-result { grid-template-columns: repeat(4, 1fr); } }
+
+  .risk-result-item { text-align: center; }
+  .risk-result-item .label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; }
+  .risk-result-item .value { font-size: 22px; font-weight: 700; color: var(--lime); letter-spacing: -1px; }
+
+  .rr-chart-wrap { margin-top: 20px; padding: 20px; background: var(--dark3); border: 1px solid var(--border); border-radius: 10px; }
+  .rr-chart-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 14px; }
+  .rr-bar { display: flex; gap: 6px; align-items: flex-end; height: 70px; }
+  .rr-loss { background: #ef4444; border-radius: 4px 4px 0 0; width: 44px; transition: height 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .rr-win { background: var(--lime); border-radius: 4px 4px 0 0; width: 44px; transition: height 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 -4px 20px rgba(163,230,53,0.3); }
+  .rr-labels { display: flex; gap: 6px; margin-top: 6px; }
+  .rr-label { width: 44px; text-align: center; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 1px; }
+  .risk-note { margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: center; letter-spacing: 0.5px; }
+
+  /* ── BONUS CARDS ── */
+  .bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+
+  .bonus-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+
+  .bonus-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+
+  .bonus-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: linear-gradient(0deg, rgba(163,230,53,0.03) 0%, transparent 100%);
+  }
+
+  .bonus-icon {
+    width: 44px; height: 44px;
+    background: rgba(163,230,53,0.07);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    font-size: 20px;
+  }
+
+  .bonus-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.2px; }
+  .bonus-card p { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+
+  .bonus-tag {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--lime-dim);
+    background: rgba(163,230,53,0.06);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  /* ── SETUP CARDS ── */
+  .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+  .setup-card {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+
+  .setup-card:hover { border-color: var(--border-bright); }
+
+  .setup-emoji { font-size: 22px; margin-bottom: 10px; }
+  .setup-name { font-size: 13px; font-weight: 600; color: var(--lime); margin-bottom: 12px; }
+
+  .setup-row { margin-bottom: 8px; }
+  .setup-row-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px; }
+  .setup-row-val { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .setup-rr { font-size: 13px; color: var(--lime); font-weight: 700; }
+
+  /* ── MINDSET TAB ── */
+  .mindset-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .mindset-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .mindset-card:hover { border-color: var(--border-bright); }
+
+  .mindset-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--lime);
+    opacity: 0.5;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .mindset-card.danger::before { background: var(--red); }
+  .mindset-card.gold::before { background: var(--gold); }
+
+  .mindset-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--lime-dim);
+    margin-bottom: 10px;
+  }
+
+  .mindset-card.danger .mindset-label { color: #f87171; }
+  .mindset-card.gold .mindset-label { color: var(--gold); }
+
+  .mindset-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+
+  .mindset-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .mindset-quote {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: var(--dark3);
+    border-left: 2px solid var(--lime-dim);
+    border-radius: 0 6px 6px 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── THUMBNAILS ── */
+  .thumb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+  .thumb-card {
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .thumb-card:hover { border-color: var(--border-bright); transform: scale(1.02); }
+  .thumb1 { background: #060606; }
+  .thumb2 { background: #060d06; }
+  .thumb3 { background: #06060d; }
+
+  .thumb-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(163,230,53,0.1) 0%, transparent 70%);
+  }
+
+  .thumb-text { font-size: clamp(12px, 2.5vw, 17px); font-weight: 800; color: var(--lime); text-align: center; z-index: 1; letter-spacing: -0.5px; line-height: 1.2; }
+  .thumb-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); z-index: 1; letter-spacing: 1px; text-transform: uppercase; }
+
+  .thumb-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--lime);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px; font-weight: 700;
+    padding: 3px 9px; border-radius: 4px;
+    letter-spacing: 1px; text-transform: uppercase; z-index: 2;
+  }
+
+  .mini-chart {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 80%; height: 30px;
+    opacity: 0.65;
+  }
+
+  /* ── DESIGN SPECS ── */
+  .design-spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .design-spec-item strong { color: var(--lime); font-weight: 500; display: block; margin-bottom: 3px; font-size: 11px; }
+
+  /* ── FAQ ── */
+  .faq-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .faq-item {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .faq-item:hover { border-color: var(--border-bright); }
+  .faq-item.open { border-color: rgba(163,230,53,0.35); }
+
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    gap: 12px;
+    user-select: none;
+  }
+
+  .faq-arrow { color: var(--text-dim); font-size: 12px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--lime); }
+
+  .faq-a {
+    display: none;
+    padding: 0 20px 18px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    border-top: 1px solid var(--border);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .faq-item.open .faq-a { display: block; }
+
+  /* ── FOOTER CTA ── */
+  .footer-cta {
+    text-align: center;
+    padding: 60px 32px;
+    border-top: 1px solid var(--border);
+    background: var(--dark2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .footer-cta::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 300px;
+    background: radial-gradient(ellipse, rgba(163,230,53,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .footer-cta h2 {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+
+  .footer-cta h2 em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--lime);
+    font-weight: 400;
+  }
+
+  .footer-cta p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .hero { padding: 56px 20px 40px; }
+    .section { padding: 28px 16px 60px; }
+    .module-header { padding: 14px 16px; }
+    .risk-label { min-width: 90px; font-size: 11px; }
+    .proof-sep { display: none; }
+  }
+</style>
+
+<div class="page">
+
+  <!-- ─────── HERO ─────── -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-eyebrow">Institutional Execution Framework</div>
+
+    <h1>Price Action<br><span class="accent">Operating System</span></h1>
+
+    <p class="hero-tagline">
+      A complete institutional execution framework. Read market structure, identify engineered liquidity, execute with precision — and operate with the calm discipline of a professional participant.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat-pill"><span class="dot"></span><span>Modules</span><strong>8</strong></div>
+      <div class="stat-pill"><span class="dot"></span><span>Depth</span><strong>Institutional</strong></div>
+      <div class="stat-pill"><span class="dot"></span><span>Core Setups</span><strong>2 Only</strong></div>
+      <div class="stat-pill"><span class="dot"></span><span>Bonus PDFs</span><strong>4 Included</strong></div>
+      <div class="stat-pill"><span class="dot"></span><span>Risk Calc</span><strong>Interactive</strong></div>
+    </div>
+
+    <div class="hero-cta-wrap">
+      <button class="cta-enjoy" onclick="scrollToModules()">
+        Enjoy <span class="arrow">→</span>
+      </button>
+      <p class="cta-note">No indicators. No noise. Just price.</p>
+    </div>
+
+    <!-- Animated chart -->
+    <div class="chart-anim">
+      <svg viewBox="0 0 560 110" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a3e635" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#a3e635" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="0" y1="30" x2="560" y2="30" stroke="#a3e635" stroke-width="0.4" stroke-dasharray="4,8" opacity="0.15"/>
+        <line x1="0" y1="60" x2="560" y2="60" stroke="#a3e635" stroke-width="0.4" stroke-dasharray="4,8" opacity="0.1"/>
+        <line x1="0" y1="90" x2="560" y2="90" stroke="#a3e635" stroke-width="0.4" stroke-dasharray="4,8" opacity="0.07"/>
+        <!-- S/R line -->
+        <line x1="0" y1="66" x2="560" y2="66" stroke="#ef4444" stroke-width="0.8" stroke-dasharray="5,4" opacity="0.35" class="chart-fill"/>
+        <text x="8" y="62" font-size="8" fill="#ef4444" opacity="0.5" font-family="monospace">S/R ZONE</text>
+        <!-- Area fill -->
+        <path d="M0,88 L50,80 L90,74 L120,78 L155,64 L185,68 L215,52 L245,57 L275,40 L305,44 L335,30 L365,35 L395,20 L425,24 L455,13 L490,17 L530,8 L560,10 L560,110 L0,110 Z"
+              fill="url(#chartGrad)" class="chart-fill"/>
+        <!-- Line -->
+        <path d="M0,88 L50,80 L90,74 L120,78 L155,64 L185,68 L215,52 L245,57 L275,40 L305,44 L335,30 L365,35 L395,20 L425,24 L455,13 L490,17 L530,8 L560,10"
+              fill="none" stroke="#a3e635" stroke-width="1.8" class="chart-line" filter="url(#glow)" opacity="0.85"/>
+        <!-- Entry + TP markers -->
+        <circle cx="335" cy="30" r="4" fill="#a3e635" class="chart-dot" style="animation-delay:2.2s"/>
+        <text x="343" y="26" font-size="8" fill="#65a30d" font-family="monospace">ENTRY</text>
+        <circle cx="455" cy="13" r="4" fill="#a3e635" class="chart-dot" style="animation-delay:2.7s"/>
+        <text x="463" y="9" font-size="8" fill="#65a30d" font-family="monospace">TP</text>
+        <!-- Vertical dashed at entry -->
+        <line x1="335" y1="30" x2="335" y2="110" stroke="#a3e635" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.2" class="chart-fill"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ─────── PROOF BAR ─────── -->
+  <div class="proof-bar">
+    <div class="proof-item"><span class="icon">📊</span><strong>8 Deep Modules</strong></div>
+    <div class="proof-sep"></div>
+    <div class="proof-item"><span class="icon">🎯</span><strong>2–3 Proven Setups</strong></div>
+    <div class="proof-sep"></div>
+    <div class="proof-item"><span class="icon">🧮</span><strong>Live Risk Calculator</strong></div>
+    <div class="proof-sep"></div>
+    <div class="proof-item"><span class="icon">📋</span><strong>Interactive Checklists</strong></div>
+    <div class="proof-sep"></div>
+    <div class="proof-item"><span class="icon">🎁</span><strong>4 Bonus PDFs</strong></div>
+    <div class="proof-sep"></div>
+    <div class="proof-item"><span class="icon">🧠</span><strong>Mindset Module</strong></div>
+  </div>
+
+  <!-- ─────── TABS ─────── -->
+  <div class="nav-tabs" id="navTabs">
+    <button class="tab-btn active" onclick="showTab('modules',this)">Modules</button>
+    <button class="tab-btn" onclick="showTab('checklist',this)">Checklist</button>
+    <button class="tab-btn" onclick="showTab('risk',this)">Risk Calc</button>
+    <button class="tab-btn" onclick="showTab('bonuses',this)">Bonuses</button>
+    <button class="tab-btn" onclick="showTab('mindset',this)">Mindset</button>
+    <button class="tab-btn" onclick="showTab('faq',this)">FAQ</button>
+  </div>
+
+  <!-- ─────── MODULES ─────── -->
+  <div class="section active" id="tab-modules">
+    <p class="sec-heading">8 Modules — Institutional Execution Framework</p>
+
+    <div class="learn-grid" style="margin-bottom:28px;">
+      <div class="learn-card">
+        <div class="learn-icon">📖</div>
+        <h4>Read Markets at the Institutional Level</h4>
+        <p>Understand liquidity, structural engineering, and institutional order flow — the mechanics that actually drive price.</p>
+      </div>
+      <div class="learn-card">
+        <div class="learn-icon">🎯</div>
+        <h4>Two Setups. Complete Edge.</h4>
+        <p>Two entry models with explicit rules, objective confirmation criteria, and defined invalidation logic. No discretion required.</p>
+      </div>
+      <div class="learn-card">
+        <div class="learn-icon">🛡️</div>
+        <h4>Structural Risk Architecture</h4>
+        <p>Logical stop placement, position sizing mathematics, and the capital preservation protocols that keep you in the game.</p>
+      </div>
+      <div class="learn-card">
+        <div class="learn-icon">🔁</div>
+        <h4>A Daily Protocol That Compounds</h4>
+        <p>Pre-market preparation, session bias framework, live trade rules, and a post-session review system that builds compounding knowledge.</p>
+      </div>
+    </div>
+
+    <div class="module-grid" id="moduleGrid"></div>
+  </div>
+
+  <!-- ─────── CHECKLIST ─────── -->
+  <div class="section" id="tab-checklist">
+    <p class="sec-heading">Interactive Daily Trading Checklist</p>
+
+    <div class="checklist-progress">
+      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;">SESSION PROGRESS</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">0 / 0</span>
+    </div>
+
+    <p class="check-section-label">☀️ Pre-Market — Before You Touch a Chart</p>
+    <div class="checklist" id="checklistPre"></div>
+
+    <p class="check-section-label">⚡ During Trade Rules</p>
+    <div class="checklist" id="checklistDuring"></div>
+
+    <p class="check-section-label">📓 Post-Trade Review</p>
+    <div class="checklist" id="checklistPost"></div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:var(--dark2);border:1px solid var(--border);border-radius:8px;">
+      <p style="font-size:12px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:0.5px;text-align:center;">
+        Tap each item to check it off. Reset refreshes the page.
+        <span style="color:var(--lime-dim);cursor:pointer;margin-left:8px;" onclick="resetChecklist()">[ Reset ]</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ─────── RISK CALC ─────── -->
+  <div class="section" id="tab-risk">
+    <p class="sec-heading">Risk Management Calculator</p>
+
+    <div class="risk-calc">
+      <div class="risk-row">
+        <span class="risk-label">Account Size</span>
+        <input type="range" id="rAcct" min="500" max="50000" step="500" value="5000" oninput="calcRisk()">
+        <span class="risk-val" id="rAcctVal">$5,000</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">Risk % / Trade</span>
+        <input type="range" id="rPct" min="0.5" max="3" step="0.5" value="1" oninput="calcRisk()">
+        <span class="risk-val" id="rPctVal">1%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">Stop Loss (pips)</span>
+        <input type="range" id="rSL" min="5" max="80" step="5" value="20" oninput="calcRisk()">
+        <span class="risk-val" id="rSLVal">20 pips</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">R:R Ratio</span>
+        <input type="range" id="rRR" min="1" max="5" step="0.5" value="2" oninput="calcRisk()">
+        <span class="risk-val" id="rRRVal">1:2</span>
+      </div>
+
+      <div class="risk-result" id="riskResult">
+        <div class="risk-result-item"><div class="label">Max Risk $</div><div class="value" id="rDollar">$50</div></div>
+        <div class="risk-result-item"><div class="label">TP Distance</div><div class="value" id="rTP">40 pips</div></div>
+        <div class="risk-result-item"><div class="label">Potential Profit</div><div class="value" id="rProfit">$100</div></div>
+        <div class="risk-result-item"><div class="label">Win Rate Needed</div><div class="value" id="rWR">34%</div></div>
+      </div>
+    </div>
+
+    <div class="rr-chart-wrap">
+      <div class="rr-chart-title">Risk vs Reward — Visual</div>
+      <div class="rr-bar">
+        <div class="rr-loss" id="rrLossBar" style="height:30px;"></div>
+        <div class="rr-win" id="rrWinBar" style="height:60px;"></div>
+      </div>
+      <div class="rr-labels">
+        <div class="rr-label">Risk</div>
+        <div class="rr-label">Reward</div>
+      </div>
+      <p class="risk-note">Rule: Risk 1–2% max. Protect capital first. Profits follow naturally.</p>
+    </div>
+
+    <div style="margin-top:20px;">
+      <p class="sec-heading" style="margin-bottom:16px;">Entry Confirmation — Setup Quick Reference</p>
+      <div class="setup-grid" id="setupCards"></div>
+    </div>
+  </div>
+
+  <!-- ─────── BONUSES ─────── -->
+  <div class="section" id="tab-bonuses">
+    <p class="sec-heading">Bonus Materials Included</p>
+
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <div class="bonus-icon">📋</div>
+        <h4>Trading Checklist PDF</h4>
+        <p>Pre-market, during-trade, and post-trade rules. Print it. Pin it. Follow it every single session without fail.</p>
+        <span class="bonus-tag">Printable PDF</span>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon">📐</div>
+        <h4>Chart Marking Guide</h4>
+        <p>Exactly how to draw zones, structure levels, and entry points with precision. No guessing where lines belong.</p>
+        <span class="bonus-tag">Visual Guide</span>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon">⚡</div>
+        <h4>Entry Confirmation Sheet</h4>
+        <p>Only 2–3 setups. The exact candle signals that confirm a valid entry. One page — always within reach.</p>
+        <span class="bonus-tag">Cheat Sheet</span>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon">🎯</div>
+        <h4>Risk Formula Card</h4>
+        <p>Calculate position size in seconds. Never blow up from a single trade again. The math is simpler than you think.</p>
+        <span class="bonus-tag">Formula Card</span>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon">🧠</div>
+        <h4>Trader Psychology Guide</h4>
+        <p>The mental edge that separates professionals from gamblers. Covers FOMO, revenge trading, and building process-based thinking.</p>
+        <span class="bonus-tag">Mindset PDF</span>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon">📓</div>
+        <h4>Trade Journal Template</h4>
+        <p>A ready-to-use journal with 5 post-trade questions. Track your growth. Identify your edge. Eliminate your mistakes.</p>
+        <span class="bonus-tag">Journal Template</span>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;padding:22px;background:var(--dark2);border:1px solid var(--border-bright);border-radius:12px;text-align:center;">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2.5px;color:var(--lime-dim);text-transform:uppercase;margin-bottom:10px;">Total Value</p>
+      <p style="font-size:28px;font-weight:800;color:var(--lime);letter-spacing:-1px;">Included Free</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:8px;line-height:1.6;">All 6 bonuses are embedded in your course — no upsells, no paywalls, no surprises.</p>
+    </div>
+  </div>
+
+  <!-- ─────── MINDSET ─────── -->
+  <div class="section" id="tab-mindset">
+    <p class="sec-heading">The Mental Edge — Trader Psychology</p>
+
+    <div class="mindset-grid">
+
+      <div class="mindset-card">
+        <div class="mindset-label">Foundation</div>
+        <h4>Your Edge Is Behavioral, Not Technical</h4>
+        <p>The market does not care how smart you are. It rewards the disciplined and punishes the emotional. A simple system followed with consistency will always outperform a complex system applied inconsistently.</p>
+        <div class="mindset-quote">"The system is only as strong as the person following it."</div>
+      </div>
+
+      <div class="mindset-card danger">
+        <div class="mindset-label">🚨 Common Trap</div>
+        <h4>FOMO — Fear of Missing Out</h4>
+        <p>You see price move without you. You chase the entry. The trade fails. You feel stupid. Here's the truth: there is always another setup. The market produces signals every day. Missing one is not a loss — chasing it is.</p>
+        <div class="mindset-quote">"The best trade is sometimes no trade at all."</div>
+      </div>
+
+      <div class="mindset-card danger">
+        <div class="mindset-label">🚨 Common Trap</div>
+        <h4>Revenge Trading</h4>
+        <p>A loss triggers anger. You open a larger position to "win it back." You ignore your rules. The second trade is worse than the first. Stop-loss discipline is not optional — it is the only protection you have against a bad day becoming a catastrophic one.</p>
+        <div class="mindset-quote">"Protect the capital. The edge takes care of the rest."</div>
+      </div>
+
+      <div class="mindset-card gold">
+        <div class="mindset-label">✦ Pro Trait</div>
+        <h4>Process Over Outcome</h4>
+        <p>Professional traders evaluate their performance based on whether they followed their rules — not whether the trade was a winner. A perfectly executed loss is a success. A winning trade that violated your rules is a long-term problem.</p>
+        <div class="mindset-quote">"Did I follow my rules? That is the only question that matters."</div>
+      </div>
+
+      <div class="mindset-card gold">
+        <div class="mindset-label">✦ Pro Trait</div>
+        <h4>The Power of Fewer Trades</h4>
+        <p>New traders believe more trades mean more profit. Professionals know the opposite. Your best trades are the ones that meet every single criterion on your checklist. Trading less, but with higher conviction, is the fastest path to consistency.</p>
+        <div class="mindset-quote">"Patience is not passive — it is your edge sharpening itself."</div>
+      </div>
+
+      <div class="mindset-card">
+        <div class="mindset-label">Growth</div>
+        <h4>Embrace the Losing Trade</h4>
+        <p>Every professional trader loses. The difference is they lose small, systematically, and without ego. A losing trade that follows your rules is data — not failure. Review it. Learn from it. Adjust. Your journal is your real edge compounding over time.</p>
+        <div class="mindset-quote">"You don't learn from winners. You learn from losses you had the discipline to keep small."</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─────── FAQ ─────── -->
+  <div class="section" id="tab-faq">
+    <p class="sec-heading">Frequently Asked Questions</p>
+
+    <div class="faq-list" id="faqList"></div>
+  </div>
+
+</div>
+
+<!-- ─────── FOOTER CTA ─────── -->
+<div class="footer-cta">
+  <h2>Built for <em>Serious</em> Execution</h2>
+  <p>No patterns to memorize. No indicators to add. A clean structural framework, precise entry logic, and the psychological architecture to follow it consistently.</p>
+  <button class="cta-enjoy" onclick="scrollToModules()">
+    Enjoy <span class="arrow">→</span>
+  </button>
+  <p style="margin-top:14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:1px;">8 Modules · 4 Bonuses · Interactive Tools</p>
+</div>
+
+<script>
+/* ── DATA ── */
+const modules = [
+  {
+    num:"01", title:"Market Architecture & Institutional Intent", sub:"Foundation · How Price Is Actually Engineered",
+    intro:"Before a single setup is valid, you need to understand what price action is at its root: the visible footprint of institutional order flow. This module strips away the retail mythology — the patterns, the indicators, the noise — and replaces it with the mechanics of how markets actually operate at the professional level.",
+    lessons:[
+      {
+        t:"What Price Action Represents at the Institutional Level",
+        tag:"Foundation",
+        body:"Price is not random. Every candlestick on your chart represents a completed auction between willing buyers and sellers at a specific price and time. When price advances, aggressive buyers are willing to pay more than sellers demand. When it falls, sellers are willing to accept less than buyers offer. The institutional insight most retail traders never grasp is that large participants — banks, proprietary desks, hedge funds — do not place orders the way retail traders do. They distribute execution across price ranges, creating the very zones that form the basis of every technical structure. Price action is the only unfiltered record of this institutional participation."
+      },
+      {
+        t:"The Three States of Market Behavior — Trending, Ranging, Transitioning",
+        tag:"Framework",
+        body:"Every market is perpetually in one of three states. A trending market creates sequential higher highs and higher lows (bullish) or lower highs and lower lows (bearish) — this is the environment with the highest-probability directional trades. A ranging market oscillates between defined boundaries without net directional progress, rewarding mean-reversion approaches. A transitioning market is the most dangerous state for directional traders: it is the period between established trends where old structure is being dismantled and new structure has not yet confirmed. The majority of retail trading losses occur when traders apply trend-following entries in transitioning markets, misreading the chaos of transition as continuation of the prior move."
+      },
+      {
+        t:"Why Indicators Fail — The Lagging Signal Problem",
+        tag:"Mindset",
+        body:"Every indicator available on any charting platform is mathematically derived from price history. RSI computes momentum from prior closes. Moving averages smooth historical data into a curve. MACD compares exponential averages of past price. By mathematical necessity, they are lagging — they show where price was, not where it is going. The deeper problem is cognitive: indicators create false precision. A trader watching RSI exceed 70 feels informed. They are not. What actually matters is where resting orders exist in the market, what liquidity pools sit above or below current price, and what the candle structure reveals about institutional intent. Indicators obscure this signal beneath mathematical abstraction. Removing them does not make the chart harder to read — it makes it cleaner."
+      },
+      {
+        t:"Auction Theory — The Origin of Every Zone and Level",
+        tag:"Concept",
+        body:"Markets function as continuous two-sided auctions. Price moves to facilitate trade — to locate the prices where willing buyers and sellers can transact. When price reaches a level where one side decisively overwhelms the other, aggressive expansion occurs. This is the institutional logic behind every support and resistance zone: they are historical records of price levels where a massive order imbalance occurred, where one side overwhelmed the opposing liquidity so completely that price departed rapidly. Because those orders were placed at a specific zone rather than a single price, the order book retains unfilled orders in that zone. When price returns, those remaining orders are filled and the directional expansion resumes. This is not mystical technical analysis — it is market microstructure."
+      },
+      {
+        t:"Timeframe Hierarchy — The Top-Down Analytical Framework",
+        tag:"System",
+        body:"Professional traders do not analyze price on a single timeframe. They operate with a top-down framework where each timeframe serves a distinct analytical purpose. The weekly and daily charts establish the dominant structural bias and identify the major institutional levels where directional conviction is highest. The 4-hour and 1-hour charts reveal internal structural sequences, recent BOS events, and the formation of institutional zones. The 15-minute and 5-minute charts provide entry precision — the specific retest level, confirmation candle, and stop placement. Trading on a lower timeframe without alignment to the higher timeframe bias is perhaps the single most common source of technically clean-looking setups that immediately fail. The institutional participants generating daily volume are operating on daily and weekly timeframes. Trading against their established intent on a 15-minute chart is trading against a current moving at full speed."
+      },
+    ]
+  },
+  {
+    num:"02", title:"Structural Analysis & The Break of Structure", sub:"The Architecture Beneath Every Valid Setup",
+    intro:"Market structure is the single most important analytical concept in price action. It is not subjective. It has a mechanical definition, a clear visual signature, and a precise set of rules for what constitutes a valid shift. Every entry in this system — without exception — is anchored to a structural event. Understanding it at the institutional level is non-negotiable.",
+    lessons:[
+      {
+        t:"The Mechanical Definition of Market Structure",
+        tag:"Core",
+        body:"Market structure is the sequential pattern of swing highs and swing lows that price creates as it moves through time. In a bullish trend, each successive swing high must exceed the prior one, and each swing low must remain above the prior swing low. This is a mathematical definition, not a discretionary judgment call. The moment a bullish swing low is violated by a closing candle, structural integrity is broken. Identifying these swing points accurately requires consistency: a swing high is a candlestick whose high exceeds both the immediately preceding and succeeding candle highs. A swing low is the inverse. Ambiguous structures — where candles overlap and swing points are unclear — are not analytical challenges to be resolved. They are signals to stand aside."
+      },
+      {
+        t:"Break of Structure — The Primary Directional Signal",
+        tag:"Core",
+        body:"A Break of Structure (BOS) is the first objective confirmation that institutional intent has shifted direction. In a bullish sequence, a BOS occurs when price closes decisively below a prior swing low. In a bearish sequence, a BOS occurs when price closes above a prior swing high. This is not simply a 'support break.' It is a structural event communicating that the participants responsible for maintaining the prior trend have been overwhelmed. The critical execution error most retail traders make is reacting immediately to the BOS candle itself — entering at the exact moment of maximum momentum and minimum risk-to-reward. The BOS identifies the shift. The subsequent retest of the broken level provides the entry. These are two distinct events, and conflating them is consistently expensive."
+      },
+      {
+        t:"Change of Character — The Early Warning Signal",
+        tag:"Advanced",
+        body:"Before a confirmed Break of Structure, the market produces a Change of Character (CHoCH): the first internal structural break against the prevailing trend direction. In a bullish trend, a CHoCH is the first time an internal swing low is violated — not a major structural low, but a minor internal low within the trend. It does not confirm a reversal. It signals that the trend's momentum is weakening and that counter-trend interest is beginning to emerge. Professional traders use CHoCH as an alert to stop adding to trend-following positions and to begin watching for a full BOS. Trading CHoCH signals as confirmed reversals — without subsequent BOS confirmation — is a high-failure-rate approach that consistently catches traders in premature counter-trend entries."
+      },
+      {
+        t:"Clean Structure vs. Choppy Structure — When the Correct Trade Is No Trade",
+        tag:"Critical",
+        body:"Not all markets produce clean, tradeable structural sequences. In consolidation periods, post-news environments, or low-liquidity sessions, swing points become ambiguous and structure fractures into overlapping, non-sequential price action. This is the environment where systematic price action traders must exercise the discipline to not participate. The defining characteristic of clean, tradeable structure is clear swing points with unambiguous sequencing — highs and lows that are visually obvious across multiple timeframes with clear space between each swing. When price creates overlapping, compressed candle formations with no defined swing sequence, the technically correct action is to close the charting platform and wait. No setup in this system is valid when structure is unclear."
+      },
+      {
+        t:"Multi-Timeframe Structural Alignment — The Probability Filter",
+        tag:"System",
+        body:"Every entry requires structural alignment across a minimum of two timeframes to carry institutional-grade probability. The higher timeframe defines the directional permission — the structural bias that determines whether long entries or short entries are authorized. The lower timeframe provides entry precision — the specific BOS event and retest that defines the exact entry point. When both timeframes agree, the probability is materially higher than when they conflict. The highest-failure-rate trades in systematic price action are those taken when a lower timeframe produces a perfect-looking BOS retest entry against a confirmed higher timeframe trend. The lower timeframe setup is real. The higher timeframe participant working against it is more real. Alignment is not optional — it is the primary probability filter."
+      },
+    ]
+  },
+  {
+    num:"03", title:"Liquidity Theory — Where Price Is Engineered to Go", sub:"The Institutional Logic Beneath Every Sweep and Reversal",
+    intro:"Liquidity is the concept that separates retail trading theory from institutional market reality. Understanding liquidity does not require access to order books or insider information — it requires understanding where predictable retail behavior places resting orders, and recognizing that institutional participants require those orders to execute their own positions efficiently.",
+    lessons:[
+      {
+        t:"What Liquidity Actually Means in Market Structure Context",
+        tag:"Foundation",
+        body:"Liquidity, in the context of institutional trading, refers to the pools of resting buy and sell orders that exist at predictable price levels. Every retail trader who places a stop loss above a swing high creates a resting buy order. Every trader with a stop below a swing low creates a resting sell order. Every breakout trader with a pending buy order above a resistance level creates a resting buy order. These resting orders are liquidity. Institutional participants executing large directional positions require this liquidity to fill their orders without creating excessive slippage. This is why price does not simply move to a level and reverse — it sweeps beyond the obvious level, triggers the resting orders (providing the fill the institution needs), and then reverses. The extension is not a failure of the level. It is the mechanism of institutional execution."
+      },
+      {
+        t:"External Range Liquidity — The Engineered Sweep Before the Real Move",
+        tag:"Advanced",
+        body:"External range liquidity sits above the current structure's swing high (buy-side liquidity) and below its swing low (sell-side liquidity). When price aggressively sweeps above a prior high and immediately reverses with a displacement candle, this is an institutional liquidity sweep — price was engineered to trigger the buy stops above the high, allowing institutional sellers to fill their short positions into that retail buying pressure. The retail mistake is entering on the breakout — precisely the moment institutional participants are using the liquidity created by that buying pressure to enter the opposite side. The professional setup is to observe the sweep, wait for the displacement candle that confirms the reversal, and enter on the retest. The sweep is not the trade. The reversal from the sweep is."
+      },
+      {
+        t:"Equal Highs and Equal Lows — Magnets, Not Resistance",
+        tag:"Critical",
+        body:"Equal highs and equal lows — price levels that have been tested multiple times without significant breakthrough — are not evidence of strong resistance or support. They are liquidity magnets. Every touch of a level places additional stop orders just beyond it. Three or four touches of the same level creates a concentrated pool of resting orders above or below. Institutional participants are aware of exactly these pools. Price engineering toward equal highs or lows should be analyzed as directional intent — the destination is the liquidity pool. When you identify equal highs forming on a daily chart, the analytical question is not 'will this level hold?' but 'when will it sweep, and what displacement occurs immediately after?' The sweep is the confirmation that institutional orders have been filled — and the subsequent move is the delivery."
+      },
+      {
+        t:"Inducement — The Setup Before the Real Setup",
+        tag:"Advanced",
+        body:"Inducement is the market's mechanism for creating premature entries before the institutional move. It is a minor, internally valid structural shift that occurs before the real directional move — designed to attract retail traders into the market early, providing the liquidity required for institutional positioning. In a bearish trend, for example, price creates a small internal BOS to the upside — enough to trigger stop losses on short positions and attract long entries. This minor sweep upward is inducement. After filling the institutional sell orders into that retail buying pressure, price resumes its bearish delivery to the real structural target. Identifying inducement requires multi-timeframe awareness: what appears as a legitimate BOS opportunity on the lower timeframe is clearly internal liquidity engineering when the higher timeframe context is understood."
+      },
+      {
+        t:"Reading Stop Hunt Architecture — Anticipating Institutional Traps",
+        tag:"Execution",
+        body:"Stop hunts follow a recognizable and repeatable architecture across all liquid markets. Price approaches a significant structural level — an obvious swing high, equal highs, or a prior consolidation boundary. It shows micro-deceleration just below the level, creating the visual impression of respect. It then extends aggressively beyond the level in one or two large candles before snapping back with an equally aggressive displacement in the opposite direction. The extension phase is typically sharp and brief. The key confirmation is the displacement candle that follows the sweep — a large, full-bodied close back away from the swept level. This displacement candle is the institutional entry signal. The subsequent retest of the displacement candle's origin is the entry. The stop sits just beyond the sweep extreme. This is one of the highest-probability, most repeatable sequences in liquid markets."
+      },
+    ]
+  },
+  {
+    num:"04", title:"Candlestick Delivery — Reading Institutional Aggression", sub:"Every Candle Is Evidence of Who Controlled That Period",
+    intro:"Candlestick analysis in this system is not about pattern memorization. It is about reading the delivery mechanics of each candle — who won, who lost, and how decisively. The difference between a high-probability confirmation candle and a deceptive one is specific, objective, and learnable.",
+    lessons:[
+      {
+        t:"What a Candlestick Measures — Auction Mechanics in a Single Bar",
+        tag:"Foundation",
+        body:"A candlestick is a compressed record of a complete auction across a defined time period. The opening price is the starting point of that period's auction. The body represents the net result — the distance and direction between the open and close. The wicks represent the full range of price discovery during the period — levels that were tested but could not sustain participation from either side. A large body with minimal wicks indicates decisive, one-sided order flow: the auction was resolved quickly and emphatically. A small body with extended wicks indicates a contested auction where neither side overwhelmed the other. Reading candlestick delivery correctly means reading these mechanics — not memorizing names like 'hammer' or 'doji.'"
+      },
+      {
+        t:"Displacement Candles — The Signature of Institutional Participation",
+        tag:"Core",
+        body:"A displacement candle is a large, impulsive candlestick that closes aggressively in one direction with minimal wick on the closing side. This is the single most important confirmation signal in price action trading. Displacement indicates that institutional participants have entered with sufficient volume to overwhelm all opposing liquidity in that period. The body should be at minimum twice the instrument's average candle size at that timeframe. Critical nuance: the close is the only element that matters. A candle that ranged aggressively in one direction but closed with a large opposing wick is not a displacement candle — it is a rejection, and directionally opposite in its implications. Displacement requires a full-bodied close. Anything less is noise, and treating it as confirmation is one of the most reliable sources of premature, low-probability entries."
+      },
+      {
+        t:"Rejection Wicks — Identifying Trapped Participants",
+        tag:"Core",
+        body:"A rejection wick is the visual record of institutional orders positioned at a specific price level. When price aggressively extends to a level and immediately reverses, the wick that forms represents the participants who were trapped by that extension. Large upper wicks in a bullish move communicate that sellers absorbed every buy order that reached that level and pushed price back down — buyers were aggressive, but sellers were more aggressive. The analytical value of a rejection wick is entirely dependent on its location. A rejection wick formed at a fresh institutional zone, after a liquidity sweep, during the London or New York session, carries significant weight. A rejection wick in the middle of a range with no structural context is background noise. Location and context are what distinguish signal from noise."
+      },
+      {
+        t:"Fair Value Gaps — The Imbalance Entry Zone",
+        tag:"Advanced",
+        body:"A Fair Value Gap (FVG) is a three-candle structure where the middle candle is a displacement candle of sufficient magnitude that its range is entirely outside the wicks of both the preceding and following candles. This creates a price zone that was never efficiently traded — a void in the auction record where one side was so aggressive that no counter-participation occurred. Markets operate on the principle of efficient price delivery, which means price frequently revisits these imbalances to complete the unfinished auction before continuing in the direction of the original displacement. High-probability FVGs share three characteristics: they are formed by a genuine displacement candle (not a moderately large candle), they exist in alignment with a confirmed structural shift, and they have not been previously visited since their formation. Applying FVGs without structural context produces low-probability, high-noise entries."
+      },
+      {
+        t:"The Confirmation Candle — The Gate Before Execution",
+        tag:"Execution",
+        body:"The confirmation candle is the final authorization before a trade is executed. After identifying the structural context, the liquidity event, the displacement, and the retracement to the entry zone — the confirmation candle is the element that differentiates disciplined execution from anticipatory gambling. This candle must close decisively in the direction of the trade, from within the entry zone, with a body representing at minimum 60% of its total range and minimal opposing wick. Entering before the confirmation candle has fully closed is anticipation — and the cost of anticipation, compounded across dozens of trades, is substantial. The confirmation candle is not an optional final check. It is the entry gate. There is no valid reason to execute before it closes."
+      },
+    ]
+  },
+  {
+    num:"05", title:"The Execution System — Entry Models & Invalidation Logic", sub:"Two Setups. Complete Rules. No Discretion Required.",
+    intro:"This is the operational core of the system. Every concept in the preceding modules exists to serve the precision execution of two primary setups. The rules are explicit. The confirmation criteria are objective. The invalidation conditions are mechanical. If a setup does not meet every criterion, it does not exist.",
+    lessons:[
+      {
+        t:"Setup One: The Break of Structure Retest — Full Execution Framework",
+        tag:"Flagship",
+        body:"The BOS Retest is the system's primary setup because it combines structural confirmation, liquidity logic, and entry precision in a single, verifiable sequence. The setup requires: a clear swing high or low to be violated by a full candle close (the BOS), followed by a retracement back to the broken level from the opposite side, followed by a confirmation candle that closes away from the level in the direction of the BOS. The critical invalidation rule: if price retraces back through the full body of the BOS candle before the confirmation occurs, the structural event is invalid and the setup is canceled. Stop loss sits just beyond the last swing point that preceded the BOS. Target sits at the next significant structural level in the trade direction. The setup does not require any additional indicator, confluence, or subjective assessment."
+      },
+      {
+        t:"Setup Two: Institutional Zone Rejection — Precision Entry at Supply and Demand",
+        tag:"Flagship",
+        body:"The Zone Rejection entry is executed when price returns to a fresh institutional supply or demand zone and provides a valid displacement candle back out of that zone. The sequence is precise: price must reach the proximal edge of the zone (not simply approach it), show a full-bodied displacement close back out of the zone in the intended trade direction, and the confirmation candle must close outside the zone boundaries. The single most important execution rule for this setup: you do not enter on the first candle into the zone. You enter on the first candle that closes back out. This eliminates a large category of failures where price enters a zone and continues through it rather than rejecting. The zone must be fresh — first approach since its formation. Stop loss sits just beyond the zone's distal edge."
+      },
+      {
+        t:"Session Timing — The Invisible Probability Filter",
+        tag:"Critical",
+        body:"Setup quality is not determined by technical structure alone. The session window in which a setup triggers is a core component of its probability. Institutional participants who generate the volume required to deliver a trade from entry to target are predominantly active during the London session (08:00–12:00 London time) and the New York session (13:30–17:00 London time). Setups that trigger during these windows carry institutional participation behind them. Setups that trigger during the Asian session close (outside JPY pairs), the midnight rollover period, or low-liquidity gaps carry significantly elevated failure rates regardless of technical quality. A technically perfect BOS retest at 03:00 New York time in EURUSD is a materially lower-probability trade than an identical setup triggering at 10:00 New York time."
+      },
+      {
+        t:"Disqualifying Conditions — When No Setup Is Valid",
+        tag:"Rule",
+        body:"Five conditions independently disqualify any setup regardless of technical quality. First: a major scheduled news event within 30 minutes of the trigger — economic releases create artificial volatility that invalidates structural analysis. Second: higher timeframe structure is ambiguous or transitioning — directional permission is absent. Third: the intended entry zone has been previously touched more than twice — institutional orders are likely depleted. Fourth: the confirmation candle shows less than 50% body-to-range ratio — institutional conviction is insufficient. Fifth: the session is outside the London or New York institutional windows. A setup meeting all technical criteria but failing any one of these conditions does not have a lower probability of success — it has unknown probability, which is categorically worse."
+      },
+      {
+        t:"Pre-Execution Checklist — Every Box Must Be Checked Before Entry",
+        tag:"Execution",
+        body:"The pre-execution checklist is not a suggestion — it is the operating protocol that converts a discretionary analysis process into a systematic execution framework. The checklist covers: higher timeframe structural bias confirmed (bullish/bearish — not neutral), a genuine liquidity event has occurred before the setup trigger (a sweep or BOS, not a gradual approach), the entry zone is fresh and untouched since formation, the confirmation candle has fully closed with a body exceeding 50% of total range, the stop loss placement is structural (not a round number or arbitrary pip distance), the risk-to-reward ratio is a minimum of 1:2, and the session timing is within the valid execution window. A setup that cannot be verified on every point of this checklist is not entered. The checklist is the line between systematic trading and expensive improvisation."
+      },
+    ]
+  },
+  {
+    num:"06", title:"Risk Architecture & Capital Preservation", sub:"The System That Keeps You in the Game Long Enough to Win",
+    intro:"No edge in the world survives poor risk architecture. This module treats risk management not as a restriction on trading but as the foundational system that makes consistent profitability possible. The mathematics of survival are non-negotiable. The interactive risk calculator is in the Risk tab.",
+    lessons:[
+      {
+        t:"Structural Stop Placement — The Only Valid Stop Logic",
+        tag:"Core",
+        body:"A stop loss is valid only when it is placed at the price level that definitively invalidates the trade thesis. In a BOS retest entry, the stop sits just below the last significant swing low that preceded the BOS — because if price returns to that level, the structural shift being traded has been negated. In a zone rejection entry, the stop sits just beyond the distal edge of the supply or demand zone — because if price closes through the full zone, the institutional orders being traded alongside have been overwhelmed. Stops placed at round numbers, at fixed pip distances, or at broker-suggested levels are not logical — they are not connected to market structure and will be triggered by normal price noise with no genuine invalidation having occurred. Structural stop placement is not optional. It is the mechanical foundation of every risk management calculation."
+      },
+      {
+        t:"The 1–2% Rule — Survival Mathematics Over a Sample of Trades",
+        tag:"Rule",
+        body:"The 1–2% risk rule is not a conservative guideline — it is the mathematical framework that prevents a losing streak from becoming a terminal event. Consider a 10-trade losing streak with 2% risk per trade: the account drawdown is approximately 18%. The same losing streak at 5% risk per trade produces a 40% drawdown requiring a 67% gain just to recover to breakeven. At 10% risk, a 10-trade losing streak eliminates 65% of the account. Even a statistically excellent edge with a 55% win rate will produce runs of consecutive losses. The 1–2% rule does not limit your gains — it ensures that the inevitable losing periods do not eliminate your ability to participate when your edge returns. The rule is not about being conservative. It is about staying in the game long enough for the edge to materialize."
+      },
+      {
+        t:"Risk-to-Reward — The Mathematics of Long-Term Profitability",
+        tag:"Concept",
+        body:"Risk-to-reward (R:R) determines whether a trading system is mathematically profitable regardless of win rate. A system with a 40% win rate is profitable at 1:2.5 R:R or better. A system with a 50% win rate is profitable at any R:R above 1:1 (after accounting for spread and commissions). The institutional implication is significant: you do not need to be right more than half the time if your average winner consistently exceeds your average loser. The minimum R:R in this system is 1:2 — meaning for every trade that reaches its stop, you require the trade to return twice the risk at target. This is not an aspiration. It is a filtering criterion: if the structure of a trade does not provide a 1:2 R:R opportunity with the stop at its correct structural position, the trade does not qualify regardless of setup quality."
+      },
+      {
+        t:"Position Sizing — The Formula That Makes Risk Management Mechanical",
+        tag:"Formula",
+        body:"Position sizing converts the abstract 1–2% risk rule into a specific, actionable trade size for every entry. The formula is straightforward: risk amount (account balance × risk percentage) divided by stop loss distance in pips (or points) equals position size per pip/point. For example: a $10,000 account risking 1% ($100) with a 20-pip structural stop produces a position size of $5 per pip. This calculation is performed before entry, not after, and the position size is fixed from the moment of entry regardless of what happens to the trade. Scaling a position up after entry because 'the trade looks good' is not confidence — it is the behavioral pattern that converts manageable losses into catastrophic ones. Position sizing is calculated once. It does not change."
+      },
+      {
+        t:"Psychological Capital — Managing the Mind Through Drawdown",
+        tag:"Mindset",
+        body:"A structured drawdown plan is as important as a position sizing formula. When a losing streak occurs — and it will — traders operating without a predefined response framework make increasingly irrational decisions: widening stops to avoid stops, reducing position size so dramatically that a recovery period produces minimal gains, or increasing position size in an attempt to 'win back' losses. The professional framework defines in advance: after three consecutive losses, reduce position size to 0.5% per trade until two consecutive winners are achieved. After a 10% drawdown, cease trading for 48 hours and complete a mandatory review of all recent trade journals. These pre-commitments are not signs of weakness — they are the psychological infrastructure that prevents a losing streak from becoming an account-ending event."
+      },
+    ]
+  },
+  {
+    num:"07", title:"Trade Review & Execution Case Studies", sub:"Theory Validated. Process Institutionalized.",
+    intro:"Every concept in this system means nothing until you can apply it in real time to real charts with real money at stake. This module deconstructs actual trade sequences — both wins and losses — with the analytical rigor that converts chart reading into a professional skill. The goal is not to memorize examples. It is to internalize the process.",
+    lessons:[
+      {
+        t:"Anatomy of a Winning Trade — What Actually Made It Work",
+        tag:"Analysis",
+        body:"A winning trade is not defined by its outcome — it is defined by the quality of its process. A winning trade in this system has five verifiable components: the higher timeframe structural bias was unambiguous before entry, a genuine liquidity event preceded the setup trigger, displacement confirmed institutional directional participation, the entry zone was fresh, and the confirmation candle closed with conviction. When all five are present, the win is a function of process. When one or more are absent and the trade wins anyway, the outcome is randomness — and treating randomness as skill is the most reliable path to inconsistency. Every winning trade should be audited with the same question: would I take this exact setup again under the same conditions?"
+      },
+      {
+        t:"Anatomy of a Losing Trade — The Diagnostic Protocol",
+        tag:"Analysis",
+        body:"Every losing trade contains precise diagnostic information about the specific point at which the process failed. The post-loss review asks four questions with complete clinical objectivity: First — was the higher timeframe bias clear and aligned with the trade direction? A no here means the trade was taken against institutional intent. Second — was there a genuine liquidity sweep before the entry trigger? A no here means the entry lacked institutional backing and was likely an inducement. Third — did the confirmation candle fully close before execution? A no here means the entry was premature anticipation. Fourth — was the stop placed at a structural level rather than an arbitrary distance? A no here means the stop was not logically connected to invalidation and was vulnerable to normal market noise. The majority of recurring loss patterns are eliminated within 20 to 30 sessions of consistent application of these four questions."
+      },
+      {
+        t:"The 90-Second Pre-Trade Analysis Framework",
+        tag:"System",
+        body:"Professional traders have a repeatable, time-efficient analysis process. The 90-second framework: open the weekly chart and identify whether price is approaching a significant weekly structure level — this determines whether extra caution is warranted regardless of lower timeframe signals. Move to the daily chart: identify the dominant structural direction (bullish, bearish, or neutral), mark the most recent BOS event and direction, identify any fresh institutional zones in the path of price. Move to the 4-hour chart: assess internal structural alignment with the daily bias, identify the most recent CHoCH or BOS signal, note session timing relative to the current candle. Drop to the entry timeframe (1-hour or 15-minute): identify the specific zone, wait for the confirmation candle. If the full process takes longer than two minutes, the setup is ambiguous — which is itself a signal to wait for clarity."
+      },
+      {
+        t:"Building the Trade Journal — The Compound Learning Architecture",
+        tag:"Practice",
+        body:"A trade journal is not a record-keeping exercise. It is a compound learning system that converts individual trading sessions into compounding professional knowledge. Every journal entry should capture: the multi-timeframe context that authorized the trade direction, the specific structural event that triggered the setup evaluation, the confirmation candle's characteristics, the precise entry price, stop loss level and structural justification, the intended target and its structural basis, and the post-trade outcome assessment covering both the mechanical execution and the psychological experience during the trade. After 30 to 50 consistently documented trades, pattern recognition becomes possible: which session window produces the highest probability results, which setup variation has the highest completion rate, which specific behavioral patterns consistently reduce performance. The journal makes the invisible visible."
+      },
+      {
+        t:"The Live Trade Mental Script — Process After Entry",
+        tag:"Mindset",
+        body:"Once a trade is entered, the analytical process is complete. The most destructive behavior pattern in trade management is continued analysis while in a position — searching for reasons to exit early, second-guessing the setup, treating normal retracement as invalidation. The professional mental script after entry is mechanical and immovable: if price has not reached the stop loss, the trade remains valid. Counter-moves, pauses, and temporary retracements are the normal delivery mechanics of every valid trade. They are not warning signs — they are the noise that triggers premature exits in undisciplined traders, converting positive expectancy setups into breakeven or small-loss outcomes. After entry, exactly two events are relevant: price reaches the stop (loss recorded, diagnostic review conducted), or price reaches the target (profit recorded, process assessment completed). Everything in between is irrelevant information."
+      },
+    ]
+  },
+  {
+    num:"08", title:"The Daily Execution Protocol", sub:"Consistency Is the Compounding Edge",
+    intro:"The best traders are not the most analytically gifted — they are the most systematically consistent. This module provides the complete daily operating protocol: what to do before markets open, the non-negotiable rules during live trades, and the post-session review process that converts daily experience into cumulative professional growth.",
+    lessons:[
+      {
+        t:"The Pre-Market Bias Framework — 6-Step Chart Preparation",
+        tag:"Protocol",
+        body:"Pre-market preparation is the analytical foundation for every intraday decision. The 6-step process: Step 1 — Weekly chart: identify whether price is approaching a significant weekly structure level, which establishes whether the session carries elevated risk. Step 2 — Daily chart: identify the dominant structural direction, the most recent BOS event, and the key institutional zones that price may interact with during the session. Step 3 — Asian session range: if trading London or New York, mark the previous Asian session range — this range frequently serves as the liquidity target for London session sweeps. Step 4 — Identify the specific price levels where institutional activity is most probable: fresh zones at structural confluence points with higher timeframe alignment. Step 5 — Set price alerts at those levels. Do not watch the chart — wait for the alert to come to you. Step 6 — Define the session maximum: one to three trades. Preparation is complete before any market opens."
+      },
+      {
+        t:"Establishing the Daily Bias — The Directional Permission Filter",
+        tag:"Daily",
+        body:"The daily bias is not a prediction — it is a directional permission filter that governs which setup types are authorized for the session. The bias is bullish when the daily chart structure is creating higher highs and higher lows, the most recent confirmed BOS was to the upside, and price is currently positioned above the key daily structure level. The bias is bearish under the inverse conditions. The bias is neutral — and this is the most critical designation — when structure is ambiguous, overlapping, or transitioning between directions. On neutral bias days, long and short entries are both unauthorized. The correct posture is to observe and wait, without forcing directional entries into an environment that does not support them. The majority of developing traders' worst days occur on days that, in retrospect, were clearly neutral bias environments."
+      },
+      {
+        t:"During-Trade Protocol — Five Rules That Are Non-Negotiable",
+        tag:"Rule",
+        body:"The five during-trade rules exist to prevent emotional decision-making from overriding the pre-trade analytical process. First: the stop loss is not moved against the position under any circumstance — moving a stop deeper into a losing trade converts systematic risk management into escalating gambling. Second: no positions are added to a losing trade — averaging down amplifies a structured loss into a potential account-defining loss. Third: once price reaches 1:1 risk-to-reward, evaluate whether session timing and structural context support moving the stop to breakeven on the remaining position. Fourth: between entry and the first partial target, the trade is not analyzed or adjusted — the analytical work was completed before entry. Fifth: if a significant unscheduled news event occurs post-entry that materially changes the fundamental context, size reduction or full exit is considered. Uncertainty is a legitimate reason to reduce exposure. It is not a reason to hold and hope."
+      },
+      {
+        t:"Post-Trade Review — Five Questions Without Ego",
+        tag:"Growth",
+        body:"The post-trade review is the highest-leverage activity a developing trader performs — and the most consistently avoided. The five questions, answered with complete honesty regardless of outcome: First — was the higher timeframe bias unambiguous and aligned with the trade direction before execution? Second — was there a genuine liquidity event (sweep or BOS) before the entry trigger, or was the entry an inducement setup? Third — did the confirmation candle fully close before execution, or was the entry premature? Fourth — was the stop placed at a structurally logical level — a level whose violation genuinely invalidates the thesis? Fifth — what is one specific, executable process adjustment for the next session? These five questions, applied honestly to every trade over 30 sessions, produce more measurable performance improvement than any additional technical study."
+      },
+      {
+        t:"The Weekly Compound Review — Turning Sessions Into Systems",
+        tag:"Growth",
+        body:"The weekly review is a higher-order analysis of the complete record across the previous five sessions. Its purpose is not to evaluate individual trades but to identify systemic behavioral patterns across a statistically meaningful sample. The professional weekly review examines: which session window produced the cleanest setup quality (and whether trading was concentrated in those windows), which instrument demonstrated the most structurally clear behavior (and whether analytical focus was appropriately allocated), the accuracy rate of daily bias assessments versus actual structural behavior, and the ratio of rule-adherent executions to discretionary deviations. The weekly review produces one output: the single highest-leverage behavioral adjustment available for the coming week. One adjustment. Not five. The compound effect of one deliberate, focused improvement per week, applied consistently over months, is the mechanism by which developing traders become professional ones."
+      },
+    ]
+  }
+];
+
+const setupCards = [
+  {name:"BOS + Retest", emoji:"📈", condition:"Price breaks structure, retests the level", entry:"First candle that holds the level with a strong close", sl:"Below the wick of the retest candle", rr:"Minimum 1:2"},
+  {name:"Zone Rejection", emoji:"🔴", condition:"Price enters a supply or demand zone", entry:"Engulfing or strong rejection candle at the zone", sl:"Above zone high (supply) / Below zone low (demand)", rr:"Minimum 1:2"},
+  {name:"Structure Candle", emoji:"🕯️", condition:"Price at a key structure level", entry:"Pinbar or strong close candle confirmation", sl:"Beyond the structure level", rr:"Minimum 1:1.5"},
+];
+
+const preChecks = [
+  "Mark all key support and resistance zones on the daily/4H chart",
+  "Identify today's market bias — bullish, bearish, or neutral",
+  "Check for major news events (avoid trading 30 min around them)",
+  "Identify potential setups — BOS retest or zone rejection only",
+  "Set price alerts — do NOT sit and stare at charts",
+  "Define maximum trades for the day (1–3 max, non-negotiable)"
+];
+const duringChecks = [
+  "Entry matches one of my 2–3 setups exactly — no exceptions",
+  "Stop loss is placed at structure, not a round number",
+  "Risk is 1–2% of account — calculated before entry, never after",
+  "Once in the trade: do NOT move your stop loss against the position",
+  "If price reaches 1:1 — consider moving SL to breakeven",
+  "Do not add to a losing position. Ever. Under any circumstance."
+];
+const postChecks = [
+  "Did I follow all entry rules? (Yes / No — be honest)",
+  "Was my stop placement logical and structural?",
+  "Did I interfere with the trade after entry?",
+  "What was the outcome? Win / Loss / Breakeven",
+  "What is one thing I will do differently next trade?"
+];
+
+const faqs = [
+  {q:"Do I need trading experience to start this course?", a:"No. The course starts from first principles — what price action is, why markets move, and how to read a blank chart. Absolute beginners will find it approachable, while experienced traders will find depth in the later modules."},
+  {q:"Why only 2–3 setups? Don't I need more strategies?", a:"More strategies create decision paralysis. The traders who master one or two setups deeply will consistently outperform those who know twenty setups superficially. This course gives you precision, not volume."},
+  {q:"Do I need any specific platform or broker?", a:"No. The concepts in this course apply universally — forex, crypto, indices, stocks. Any charting platform works (TradingView is recommended). No specific broker is required."},
+  {q:"How long until I see consistent results?", a:"There is no honest answer that includes a specific timeframe — anyone who promises one is misleading you. With consistent practice of the daily routine, most students report noticeably cleaner chart reading within 4–8 weeks. Consistency in trading is a skill built over months."},
+  {q:"Why no indicators at all?", a:"Indicators are derived from price — they show you where price was, not where it's going. Price action is the source data itself. By reading price directly, your analysis is faster, cleaner, and more adaptable to any market condition."},
+  {q:"What makes this different from other trading courses?", a:"This course is built on restraint. No 47 setups, no 'secret patterns,' no hype. Just a clear, minimal system with interactive tools built in — the risk calculator, checklists, and setup cards are embedded directly in the course so you use them daily, not just once."},
+];
+
+/* ── BUILD FUNCTIONS ── */
+function buildModules() {
+  const grid = document.getElementById('moduleGrid');
+  modules.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'module-card';
+    card.style.animationDelay = (i * 0.06) + 's';
+    card.innerHTML = `
+      <div class="module-header" onclick="toggleModule(this.parentElement)">
+        <div class="module-num">${m.num}</div>
+        <div class="module-title"><h3>${m.title}</h3><p>${m.sub}</p></div>
+        <span class="module-arrow">▼</span>
+      </div>
+      <div class="module-body">
+        <p class="module-intro">${m.intro}</p>
+        <ul class="lesson-list">${m.lessons.map(l=>`
+          <li class="lesson-item">
+            <div class="lesson-item-header">
+              <div class="lesson-item-text"><span class="lesson-dot"></span>${l.t}</div>
+              <span class="lesson-tag">${l.tag}</span>
+            </div>
+            ${l.body ? `<p class="lesson-body">${l.body}</p>` : ''}
+          </li>`).join('')}
+        </ul>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function toggleModule(card) {
+  const wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.module-card.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) card.classList.add('open');
+}
+
+let totalChecks = 0;
+let checkedCount = 0;
+
+function buildChecklist(items, id) {
+  const el = document.getElementById(id);
+  items.forEach(item => {
+    totalChecks++;
+    const div = document.createElement('div');
+    div.className = 'check-item';
+    div.innerHTML = `<div class="check-box"></div>${item}`;
+    div.onclick = () => {
+      const wasChecked = div.classList.contains('checked');
+      div.classList.toggle('checked');
+      div.querySelector('.check-box').textContent = div.classList.contains('checked') ? '✓' : '';
+      checkedCount += div.classList.contains('checked') ? 1 : -1;
+      updateProgress();
+    };
+    el.appendChild(div);
+  });
+}
+
+function updateProgress() {
+  const pct = totalChecks > 0 ? (checkedCount / totalChecks) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = checkedCount + ' / ' + totalChecks;
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.check-item').forEach(d => {
+    d.classList.remove('checked');
+    d.querySelector('.check-box').textContent = '';
+  });
+  checkedCount = 0;
+  updateProgress();
+}
+
+function buildSetupCards() {
+  const el = document.getElementById('setupCards');
+  setupCards.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'setup-card';
+    div.innerHTML = `
+      <div class="setup-emoji">${s.emoji}</div>
+      <div class="setup-name">${s.name}</div>
+      <div class="setup-row"><div class="setup-row-label">Condition</div><div class="setup-row-val">${s.condition}</div></div>
+      <div class="setup-row"><div class="setup-row-label">Entry Signal</div><div class="setup-row-val">${s.entry}</div></div>
+      <div class="setup-row"><div class="setup-row-label">Stop Loss</div><div class="setup-row-val">${s.sl}</div></div>
+      <div class="setup-row"><div class="setup-row-label">Min R:R</div><div class="setup-row-val setup-rr">${s.rr}</div></div>`;
+    el.appendChild(div);
+  });
+}
+
+function buildFAQ() {
+  const el = document.getElementById('faqList');
+  faqs.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.innerHTML = `
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        ${f.q}
+        <span class="faq-arrow">▼</span>
+      </div>
+      <div class="faq-a">${f.a}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function calcRisk() {
+  const acct = +document.getElementById('rAcct').value;
+  const pct  = +document.getElementById('rPct').value;
+  const sl   = +document.getElementById('rSL').value;
+  const rr   = +document.getElementById('rRR').value;
+
+  document.getElementById('rAcctVal').textContent = '$' + acct.toLocaleString();
+  document.getElementById('rPctVal').textContent = pct + '%';
+  document.getElementById('rSLVal').textContent = sl + ' pips';
+  document.getElementById('rRRVal').textContent = '1:' + rr;
+
+  const risk   = acct * pct / 100;
+  const profit = risk * rr;
+  const tp     = sl * rr;
+  const wr     = Math.round(100 / (1 + rr));
+
+  document.getElementById('rDollar').textContent  = '$' + Math.round(risk);
+  document.getElementById('rTP').textContent      = Math.round(tp) + ' pips';
+  document.getElementById('rProfit').textContent  = '$' + Math.round(profit);
+  document.getElementById('rWR').textContent      = wr + '%';
+
+  const maxH = 65;
+  document.getElementById('rrLossBar').style.height = (maxH / Math.max(rr, 1)) + 'px';
+  document.getElementById('rrWinBar').style.height  = maxH + 'px';
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function scrollToModules() {
+  document.getElementById('navTabs').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ── INIT ── */
+buildModules();
+buildChecklist(preChecks, 'checklistPre');
+buildChecklist(duringChecks, 'checklistDuring');
+buildChecklist(postChecks, 'checklistPost');
+buildSetupCards();
+buildFAQ();
+calcRisk();
+updateProgress();
+</script>
+</html>
